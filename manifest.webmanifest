@@ -1,0 +1,9 @@
+{
+  "name": "年末調整PDF自動転記",
+  "short_name": "年末調整",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f2f6f8",
+  "theme_color": "#12445d",
+  "lang": "ja"
+}
