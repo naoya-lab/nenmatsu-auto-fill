@@ -144,6 +144,23 @@ const VERIFIED_MAPS={
   }).flat(),
   ['xml003_C00140','fill_36'],['xml003_C00150','fill_41'],['xml003_C00160','fill_41の３'],
   ['xml003_D00130','fill_63'],['xml003_D00140','fill_64'],
+  ...Array.from({length:2},(_,i)=>{
+   const b=102+i*7;return [
+    ['xml003_G00020','fill_'+b,i],['xml003_G00040','fill_'+(b+1),i],
+    ['xml003_G00060','fill_'+(b+2),i,'period'],['xml003_G00070','fill_'+(b+3),i],
+    ['xml003_G00080','fill_'+(b+4),i],['xml003_G00130','fill_'+(b+6),i]
+   ]
+  }).flat(),
+  ...Array.from({length:2},(_,i)=>{
+   const b=121+i*5;return [
+    ['xml003_H00020','fill_'+b,i],['xml003_H00030','fill_'+(b+1),i],
+    ['xml003_H00040','fill_'+(b+2),i],['xml003_H00080','fill_'+(b+4),i]
+   ]
+  }).flat(),
+  ['xml003_G00140','fill_116'],['xml003_G00150','fill_117'],['xml003_G00160','fill_120'],
+  ['xml003_H00090','fill_131'],['xml003_I00010','fill_132'],['xml003_I00020','fill_133'],
+  ['xml003_I00030','fill_134'],['xml003_I00040','fill_135'],['xml003_I00050','fill_136'],
+
   ['xml003_F00000','fill_101']
  ],
  basic:[
