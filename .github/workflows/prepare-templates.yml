@@ -1,0 +1,55 @@
+name: Prepare official fillable PDF templates
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/prepare-templates.yml
+permissions:
+  contents: write
+jobs:
+  normalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install PDF normalizer
+        run: python -m pip install --disable-pip-version-check 'pymupdf==1.26.5'
+      - name: Download, normalize and validate official forms
+        run: |
+          python - <<'PY'
+          import fitz, pathlib, urllib.request
+          names = ['2027bun_01_input.pdf','2026bun_06_input.pdf','2026bun_04_input.pdf']
+          root='https://www.nta.go.jp/taxes/tetsuzuki/shinsei/annai/gensen/pdf/'
+          dest=pathlib.Path('templates')
+          dest.mkdir(exist_ok=True)
+          for name in names:
+              req=urllib.request.Request(root+name,headers={'User-Agent':'Mozilla/5.0'})
+              with urllib.request.urlopen(req,timeout=45) as response:
+                  raw=response.read()
+              if not raw.startswith(b'%PDF-') or len(raw)>15_000_000: raise RuntimeError(name+': invalid source')
+              src=fitz.open(stream=raw,filetype='pdf')
+              if src.needs_pass and not src.authenticate(''): raise RuntimeError(name+': password required')
+              original_text = sum(len(p.get_text()) for p in src)
+              if original_text < 500: raise RuntimeError(name+': source has missing text')
+              data=src.tobytes(garbage=3,deflate=True,encryption=fitz.PDF_ENCRYPT_NONE)
+              output=fitz.open(stream=data,filetype='pdf')
+              count=sum(len(p.get_text()) for p in output)
+              if output.is_encrypted or output.needs_pass or count < original_text*0.95 or len(output)!=len(src):
+                  raise RuntimeError(name+': normalization lost text')
+              path=(dest/name)
+              path.write_bytes(data)
+              print(name,'pages',len(output),'chars',count,'bytes',len(data))
+          PY
+      - name: Commit official blank PDF templates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add templates/*.pdf
+          if ! git diff --cached --quiet; then
+            git commit -m "Normalize official blank PDF templates while preserving original text"
+            git push
+          fi
